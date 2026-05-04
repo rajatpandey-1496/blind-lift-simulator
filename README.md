@@ -1,71 +1,152 @@
-# 🛗 Blind Lift Simulator
+# The Blind Lift Simulator
 
-A fun elevator simulation game built with **Pygame** where you watch passengers ride a lift across 10 floors — with random entries, exits, and unpredictable stops!
+A browser-based prediction game where you watch an elevator travel up a 10-floor building and try to guess how many stops it will make — before it rides.
 
+Originally conceived as a Python/pygame project, rebuilt as a fast, fully client-side React app with no backend required.
+
+---
 ## 🎮 Play Now
 👉 [Play Blind Lift Simulator](https://asset-manager--rajatpandey1496.replit.app/)
 
-## 🎮 Gameplay
+## How to Play
 
-- An elevator starts at the bottom of a 10-floor building
-- Passengers board with random destination floors
-- The lift travels floor by floor, stopping when someone exits or enters
-- Watch the trip unfold and see the total number of stops at the end!
+1. You see how many passengers are already aboard the elevator at floor 1
+2. Set your prediction for the number of stops the elevator will make on the way up
+3. Click **Lock In & Ride** — then watch
+4. Score is based on how close your guess was to the actual stop count
 
-## 🖼️ Preview
+### Scoring
 
-> *A retro-styled building shaft with a glowing blue elevator, gold passenger dots, and real-time floor animations.*
+| Difference | Rating |
+|---|---|
+| 0 | Perfect read 🎯 |
+| 1 | So close 👌 |
+| 2 | Not bad 🤔 |
+| 3–4 | Off the mark 😬 |
+| 5+ | Way off 💀 |
 
-## 🚀 Getting Started
+---
+
+## Features
+
+- **Animated elevator** rides floor by floor with eased motion
+- **Passenger dots** shown inside the car (hidden on Hard mode)
+- **Three difficulty modes**
+  - Easy — slow speed, low boarding chance, all info visible
+  - Normal — moderate speed and boarding chance
+  - Hard — fast, higher boarding chance, passenger count and stops hidden during the ride
+- **Daily Challenge** — everyone gets the exact same lift each day, generated from a date-based seed. One play per day, result saved locally
+- **Session stats** — live accuracy %, current streak, best streak
+- **All-time records** — total trips, best accuracy, best streak, per-difficulty trip counts, persisted in `localStorage`
+- **Trip log** — shows every exit and boarding event after the ride
+- **History mini-chart** — colour-coded bar chart of your last 10 trips
+
+---
+
+## Daily Challenge
+
+Every day a new lift is generated using a seeded random number generator ([mulberry32](https://github.com/bryc/code/blob/master/jshash/PRNGs.md)) keyed to the current date. This means:
+
+- Every player gets identical passengers and boarding events on the same day
+- Results are stored in `localStorage` — refreshing the page keeps your result
+- The card resets automatically at midnight for a fresh challenge
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Framework | React 18 + TypeScript |
+| Build tool | Vite |
+| Styling | Tailwind CSS v4 + tw-animate-css |
+| State | React hooks only (no external state library) |
+| Persistence | `localStorage` (no backend) |
+| RNG | mulberry32 (seeded PRNG for daily mode) |
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.x
-- Pygame
+- Node.js 18+
+- pnpm
 
-### Installation
+### Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/blind-lift-simulator.git
-cd blind-lift-simulator
-
-# Install dependencies
-pip install pygame
-
-# Run the game
-python main.py
+pnpm install
 ```
 
-## 🕹️ Controls
+### Run (development)
 
-| Key | Action |
-|-----|--------|
-| `SPACE` | Start the elevator trip |
-| Close window | Quit the game |
-
-## 🧠 How It Works
-
-- **Passengers** are assigned random destination floors (2–10) at the start
-- The elevator moves upward floor by floor
-- At each floor, it checks if anyone needs to **exit**
-- There's also a **20% chance** someone new boards (if seats remain)
-- Stops are counted and logged; the last 5 events are shown at the end
-
-## 📁 Project Structure
-
-```
-blind-lift-simulator/
-├── main.py         # Main game file
-└── README.md       # This file
+```bash
+PORT=5173 BASE_PATH=/ pnpm --filter @workspace/blind-lift run dev
 ```
 
-## 🛠️ Built With
+Then open `http://localhost:5173` in your browser.
 
-- [Python](https://www.python.org/)
-- [Pygame](https://www.pygame.org/)
+### Build
 
+```bash
+PORT=5173 BASE_PATH=/ pnpm --filter @workspace/blind-lift run build
+```
 
-## 🙌 Author
+### Simplifying for standalone use
 
-Made with ❤️ by **Rajat Pandey**# blind-lift-simulator
+If you pull just the `artifacts/blind-lift` folder and want to run it outside the monorepo, replace the `vite.config.ts` with a simpler version:
+
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: { "@": path.resolve(__dirname, "src") },
+  },
+});
+```
+
+Then run:
+
+```bash
+npm install
+npm run dev
+```
+
+---
+
+## Project Structure
+
+```
+artifacts/blind-lift/
+├── src/
+│   ├── pages/
+│   │   └── Game.tsx        # All game logic and UI
+│   ├── App.tsx             # Root component
+│   ├── main.tsx            # Entry point
+│   └── index.css           # Tailwind + custom animations
+├── vite.config.ts
+└── package.json
+```
+
+All game logic lives in a single file (`Game.tsx`) with no external game libraries — just React hooks and `requestAnimationFrame` for animation.
+
+---
+
+## localStorage Keys
+
+| Key | Contents |
+|---|---|
+| `blindlift_v1` | All-time stats (trips, streaks, accuracy, per-difficulty counts) |
+| `blindlift_daily_v1` | Today's daily challenge result (date, guess, actual, diff) |
+
+---
+
+## License
+
+MIT
